@@ -23,7 +23,10 @@ var init = function () {
     if (loaded) return;
     loaded = true;
     var mobile = window.isDevice;
-    var koef = mobile ? 0.5 : 1;
+    var screenWidth = window.innerWidth;
+    // Three performance tiers: phone (weakest), tablet (mid), desktop/laptop (strongest)
+    var tier = !mobile ? 'desktop' : (screenWidth >= 700 ? 'tablet' : 'phone');
+    var koef = tier === 'phone' ? 0.5 : (tier === 'tablet' ? 0.75 : 1);
     var canvas = document.getElementById('pulseheart_heart');
     var ctx = canvas.getContext('2d');
     var width = canvas.width = koef * innerWidth;
@@ -47,10 +50,12 @@ var init = function () {
         ctx.fillRect(0, 0, width, height);
     });
 
-    var traceCount = mobile ? 20 : 50;
+    var traceCount = tier === 'phone' ? 20 : (tier === 'tablet' ? 35 : 50);
     var pointsOrigin = [];
     var i;
-    var dr = mobile ? 0.05 : 0.0167;
+    // Smaller dr = more points = denser heart. Tuned per tier so phones/tablets
+    // stay smooth while desktop gets the full ~6x density.
+    var dr = tier === 'phone' ? 0.1 : (tier === 'tablet' ? 0.035 : 0.0167);
     for (i = 0; i < Math.PI * 2; i += dr) pointsOrigin.push(scaleAndTranslate(heartPosition(i), 210, 13, 0, 0));
     for (i = 0; i < Math.PI * 2; i += dr) pointsOrigin.push(scaleAndTranslate(heartPosition(i), 150, 9, 0, 0));
     for (i = 0; i < Math.PI * 2; i += dr) pointsOrigin.push(scaleAndTranslate(heartPosition(i), 90, 5, 0, 0));
